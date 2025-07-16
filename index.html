@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insta Cravings Menu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #fdfaf6 0%, #f7e9d7 100%);
+      color: #3a2f2f;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      background: linear-gradient(160deg, #8B5E3C 60%, #c49a6c 100%);
+      color: white;
+      width: 220px;
+      min-height: 100vh;
+      padding: 2.5rem 1rem 2rem 1rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 16px 0 rgba(139,94,60,0.12);
+      z-index: 10;
+    }
+
+    .sidebar h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      text-align: center;
+    }
+
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      margin: 0.7rem 0;
+      font-weight: 600;
+      font-size: 1.08rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sidebar nav a:hover {
+      background: rgba(255,255,255,0.13);
+      color: #ffe6b3;
+    }
+
+    .content {
+      margin-left: 220px;
+      padding: 2.5rem 1.5rem 2rem 1.5rem;
+      max-width: 950px;
+      margin-inline: auto;
+      min-height: 100vh;
+      background: linear-gradient(120deg, #fff8f0 60%, #f7e9d7 100%);
+      border-radius: 0 0 0 32px;
+      box-shadow: 0 0 32px 0 rgba(139,94,60,0.04);
+    }
+
+    header {
+      text-align: center;
+      font-size: 2.3rem;
+      color: #8B5E3C;
+      margin-bottom: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    #welcome {
+      background: #fff8f0;
+      padding: 2.2rem 1.5rem;
+      text-align: center;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(139,94,60,0.06);
+      margin-bottom: 2rem;
+    }
+
+    #welcome button {
+      padding: 0.7rem 1.4rem;
+      margin-top: 1.2rem;
+      background: linear-gradient(90deg, #c49a6c 0%, #8B5E3C 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.08);
+      transition: background 0.2s, transform 0.2s;
+    }
+    #welcome button:hover {
+      background: linear-gradient(90deg, #8B5E3C 0%, #c49a6c 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    #categories {
+      display: flex;
+      justify-content: space-around;
+      margin: 2.2rem 0 2.5rem 0;
+      gap: 1.2rem;
+    }
+
+    #categories button {
+      padding: 0.7rem 1.3rem;
+      background: linear-gradient(90deg, #c49a6c 0%, #8B5E3C 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.08);
+      transition: background 0.2s, transform 0.2s;
+    }
+    #categories button:hover {
+      background: linear-gradient(90deg, #8B5E3C 0%, #c49a6c 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    .category {
+      margin-bottom: 2.5rem;
+    }
+
+    .category h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      color: #8B5E3C;
+      font-weight: 700;
+    }
+
+    .item {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(139,94,60,0.10);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
+    }
+    .item:hover {
+      transform: translateY(-4px) scale(1.025);
+      box-shadow: 0 12px 32px rgba(139,94,60,0.16);
+    }
+
+    .item-image-container {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #f7e9d7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.08);
+    }
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+      transition: filter 0.2s;
+      display: block;
+    }
+    .item:hover img {
+      filter: brightness(0.97) saturate(1.1);
+    }
+    @media (max-width: 600px) {
+      .item-image-container {
+        aspect-ratio: 1/1;
+      }
+      .item img { height: 100%; }
+    }
+
+    .item-info {
+      padding: 1.2rem 1.1rem 1.3rem 1.1rem;
+    }
+
+    .item-info button {
+      margin-top: 0.7rem;
+      padding: 0.5rem 1.1rem;
+      background: linear-gradient(90deg, #c49a6c 0%, #8B5E3C 100%);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.08);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .item-info button:hover {
+      background: linear-gradient(90deg, #8B5E3C 0%, #c49a6c 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    #checkout {
+      background: #fff8f0;
+      padding: 2rem;
+      margin-top: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(139,94,60,0.06);
+    }
+
+    form input {
+      display: block;
+      margin-bottom: 1.1rem;
+      padding: 0.6rem;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 7px;
+      border: 1px solid #c49a6c;
+      font-size: 1.05rem;
+    }
+
+    form button {
+      padding: 0.7rem 1.4rem;
+      background: linear-gradient(90deg, #c49a6c 0%, #8B5E3C 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.08);
+      transition: background 0.2s, transform 0.2s;
+    }
+    form button:hover {
+      background: linear-gradient(90deg, #8B5E3C 0%, #c49a6c 100%);
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: unset;
+        text-align: center;
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 2px 16px 0 rgba(139,94,60,0.10);
+      }
+      .content {
+        margin-left: 0;
+        padding: 1.2rem 0.5rem;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .sidebar img { max-width: 80px; }
+      .sidebar h1 { font-size: 1.2rem; }
+      header { font-size: 1.3rem; }
+      .item img { height: 120px; }
+    }
+    #viewCartBtn {
+      position:fixed; bottom:2rem; right:2rem; background:#8B5E3C; color:white; border:none; border-radius:50%; width:60px; height:60px; font-size:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:999;
+      transition: transform 0.2s;
+    }
+    /* Cart bounce animation */
+    @keyframes cart-bounce {
+      0% { transform: scale(1); }
+      20% { transform: scale(1.2); }
+      40% { transform: scale(0.95); }
+      60% { transform: scale(1.08); }
+      80% { transform: scale(0.98); }
+      100% { transform: scale(1); }
+    }
+    #viewCartBtn.bounce {
+      animation: cart-bounce 0.5s;
+    }
+    .sold-out-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-radius: 16px 16px 0 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <img src="images/logo.jpg" alt="Insta Cravings Logo" style="display:block; margin:0 auto 1.2rem auto; max-width:80px; border-radius:16px; box-shadow:0 2px 8px rgba(139,94,60,0.10);">
+    <h1>Insta<br>Cravings</h1>
+    <nav>
+      <ul>
+        <li><a href="#rice" data-category="rice">🍛 Rice Meals</a></li>
+        <li><a href="#pasta" data-category="pasta">🍝 Pastas</a></li>
+        <li><a href="#snacks" data-category="snacks">🍟 Snacks</a></li>
+        <li><a href="#drinks" data-category="drinks">🧃 Drinks</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="content">
+    <header>
+      Insta Cravings Menu
+      <button id="customerLoginBtn" style="float:right; margin-top:-1.5rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:8px; padding:0.5rem 1.2rem; font-size:1rem; font-weight:600; cursor:pointer;">Login</button>
+    </header>
+
+    <section id="welcome">
+      <h2>Welcome to Insta Cravings!</h2>
+      <p>Crave it. Click it. We'll make it.</p>
+      <button onclick="document.getElementById('categories').scrollIntoView({behavior:'smooth'})">Start Order</button>
+    </section>
+
+    <section id="categories">
+      <button onclick="location.href='#rice'">🍛 Rice Meals</button>
+      <button onclick="location.href='#pasta'">🍝 Pastas</button>
+      <button onclick="location.href='#snacks'">🍟 Snacks</button>
+      <button onclick="location.href='#drinks'">🧃 Drinks</button>
+    </section>
+
+    <main class="menu">
+      <div class="category" id="rice">
+        <h2>🍛 Rice Meals</h2>
+        <div class="item">
+          <div class="item-image-container"><img src="images/chicken teriyaki.jpg" alt="Chicken Teriyaki"></div>
+          <div class="item-info">
+            <div class="item-name">Chicken Teriyaki</div>
+            <div class="item-desc">Grilled chicken in teriyaki sauce with rice.</div>
+            <div class="item-price">₱130</div>
+            <button onclick="addToCart('Chicken Teriyaki', 130)">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category" id="pasta">
+        <h2>🍝 Pastas</h2>
+        <div class="item">
+          <div class="item-image-container"><img src="images/buldak.webp" alt="Buldak Carbonara"></div>
+          <div class="item-info">
+            <div class="item-name">Buldak Carbonara</div>
+            <div class="item-desc">Instant carbonara with cheese.</div>
+            <div class="item-price">₱120</div>
+            <button onclick="addToCart('Buldak Carbonara', 120)">Add to Cart</button>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-image-container"><img src="images/carbonara.jpg" alt="Carbonara"></div>
+          <div class="item-info">
+            <div class="item-name">Carbonara</div>
+            <div class="item-desc">Creamy pasta with bacon and herbs.</div>
+            <div class="item-price">₱100</div>
+            <button onclick="addToCart('Carbonara', 100)">Add to Cart</button>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-image-container"><img src="images/spaghetti.jpg" alt="Spaghetti"></div>
+          <div class="item-info">
+            <div class="item-name">Spaghetti</div>
+            <div class="item-desc">Sweet-style Filipino spaghetti with cheese.</div>
+            <div class="item-price">₱90</div>
+            <button onclick="addToCart('Spaghetti', 90)">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category" id="snacks">
+        <h2>🍟 Snacks</h2>
+        <div class="item">
+          <div class="item-image-container"><img src="images/SpamMusubi.jpg" alt="Spam Musubi"></div>
+          <div class="item-info">
+            <div class="item-name">Spam Musubi</div>
+            <div class="item-desc">Grilled spam on sushi rice wrapped in seaweed.</div>
+            <div class="item-price">₱60</div>
+            <button onclick="addToCart('Spam Musubi', 60)">Add to Cart</button>
+          </div>
+        </div>
+        <div class="item">
+          <div class="item-image-container"><img src="images/HotdogSandwich.jpg" alt="Hotdog Sandwich"></div>
+          <div class="item-info">
+            <div class="item-name">Hotdog Sandwich</div>
+            <div class="item-desc">Juicy hotdog with mayo, ketchup, and cheese in a bun.</div>
+            <div class="item-price">₱80</div>
+            <button onclick="addToCart('Hotdog Sandwich', 80)">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category" id="drinks">
+  <h2>🧃 Drinks</h2>
+  <div class="item">
+    <div class="item-image-container"><img src="images/Juice.jpg" alt="Juice"></div>
+    <div class="item-info">
+      <div class="item-name">Juice</div>
+      <div class="item-desc">Refreshing Cucumber juice.</div>
+      <div class="item-price">₱45</div>
+      <button onclick="addToCart('Juice', 45)">Add to Cart</button>
+    </div>
+  </div>
+  <div class="item">
+    <div class="item-image-container"><img src="images/milktea.jpg" alt="Milk Tea"></div>
+    <div class="item-info">
+      <div class="item-name">Milk Tea</div>
+      <div class="item-desc">Classic milk tea with chewy pearls.</div>
+      <div class="item-price">₱60</div>
+      <button onclick="addToCart('Milk Tea', 60)">Add to Cart</button>
+    </div>
+  </div>
+</div>
+```
+</main>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+      <div style="background:white; border-radius:10px; padding:2rem; min-width:300px; max-width:90vw; position:relative;">
+        <h2>Your Cart</h2>
+        <ul id="cartItems" style="list-style:none; padding:0; margin-bottom:1rem;"></ul>
+        <div id="cartTotal" style="margin-bottom:1rem;"></div>
+        <button onclick="showCheckout()">Checkout</button>
+        <button onclick="closeCart()" style="margin-left:1rem; background:#ccc; color:#333;">Close</button>
+      </div>
+    </div>
+
+    <!-- Checkout Form -->
+    <section id="checkoutForm" style="display:none; background:#fff8f0; padding:2rem; margin-top:2rem;">
+      <h2>Checkout</h2>
+      <form id="orderForm" onsubmit="submitOrder(event)">
+        <input type="text" id="name" placeholder="Your Name" required />
+        <input type="text" id="address" placeholder="Delivery Address" required />
+        <input type="tel" id="phone" placeholder="Phone Number" required />
+        <textarea id="orderNotes" placeholder="Special Instructions (optional)" style="display:block; margin-bottom:1.1rem; padding:0.6rem; width:100%; max-width:400px; border-radius:7px; border:1px solid #c49a6c; font-size:1.05rem;"></textarea>
+        <button type="submit">Place Order</button>
+        <button type="button" onclick="cancelCheckout()" style="margin-left:1rem; background:#ccc; color:#333;">Cancel</button>
+      </form>
+    </section>
+
+    <button id="viewCartBtn" onclick="openCart()" style="position:fixed; bottom:2rem; right:2rem; background:#8B5E3C; color:white; border:none; border-radius:50%; width:60px; height:60px; font-size:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:999;">🛒</button>
+
+  </div>
+
+  <!-- Customer Login Modal -->
+  <div id="customerLoginModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:4000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:12px; padding:2rem; min-width:300px; max-width:90vw; position:relative; text-align:center;">
+      <button onclick="closeCustomerLoginModal()" style="position:absolute; top:1rem; right:1rem; background:#ccc; color:#333; border:none; border-radius:50%; width:32px; height:32px; font-size:1.2rem; cursor:pointer;">&times;</button>
+      <h2>Customer Login</h2>
+      <p style="font-size:0.98rem; margin-bottom:1.2rem;">We use your email only to save your purchases and provide loyalty rewards. We will never share or spam your email.</p>
+      <form id="customerLoginForm">
+        <input type="email" id="customerEmail" placeholder="Enter your email" required style="padding:0.6rem; width:90%; border-radius:7px; border:1px solid #c49a6c; font-size:1.05rem; margin-bottom:1rem;" />
+        <button type="submit" style="padding:0.7rem 1.4rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:8px; font-size:1.08rem; font-weight:600; cursor:pointer;">Send Login Link</button>
+      </form>
+      <div id="customerLoginMsg" style="margin-top:1rem; color:#8B5E3C;"></div>
+    </div>
+  </div>
+
+  <!-- My Orders Modal -->
+  <div id="myOrdersModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:4000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:12px; padding:2rem; min-width:300px; max-width:90vw; position:relative; text-align:center;">
+      <button onclick="closeMyOrdersModal()" style="position:absolute; top:1rem; right:1rem; background:#ccc; color:#333; border:none; border-radius:50%; width:32px; height:32px; font-size:1.2rem; cursor:pointer;">&times;</button>
+      <h2>My Orders</h2>
+      <div id="myOrdersList">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Customer Chat Modal -->
+  <div id="customerChatModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:4100; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:14px; padding:1.5rem 1.2rem 1.2rem 1.2rem; min-width:320px; max-width:95vw; width:350px; position:relative; display:flex; flex-direction:column; height:70vh;">
+      <button onclick="closeCustomerChatModal()" style="position:absolute; top:1rem; right:1rem; background:#ccc; color:#333; border:none; border-radius:50%; width:32px; height:32px; font-size:1.2rem; cursor:pointer;">&times;</button>
+      <h2 style="margin-bottom:0.5rem;">Live Chat</h2>
+      <div id="customerChatHistory" style="flex:1; overflow-y:auto; background:#f7e9d7; border-radius:8px; padding:0.7rem; margin-bottom:0.7rem; font-size:0.98rem;"></div>
+      <form id="customerChatForm" style="display:flex; gap:0.5rem;">
+        <input type="text" id="customerChatInput" placeholder="Type your message..." required style="flex:1; padding:0.5rem; border-radius:7px; border:1px solid #c49a6c; font-size:1rem;" />
+        <button type="submit" style="padding:0.5rem 1rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:8px; font-size:1.05rem; font-weight:600; cursor:pointer;">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-F1tlZBbjLWxEEOo-t_iTAoAujRt4bgs",
+      authDomain: "instacravings.firebaseapp.com",
+      projectId: "instacravings",
+      storageBucket: "instacravings.appspot.com",
+      messagingSenderId: "848484389296",
+      appId: "1:848484389296:web:650ee8d462e4b32b29c675",
+      measurementId: "G-LFB39XSBQ1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Step-by-step navigation and cart logic
+    let cart = [];
+    let currentCategory = null;
+
+    // Hide all categories initially
+    document.addEventListener('DOMContentLoaded', () => {
+      showStep('welcome');
+      // Hide all categories
+      document.querySelectorAll('.category').forEach(cat => cat.style.display = 'none');
+    });
+
+    function showStep(step) {
+      document.getElementById('welcome').style.display = (step === 'welcome') ? '' : 'none';
+      document.getElementById('categories').style.display = (step === 'category') ? 'flex' : 'none';
+      document.querySelectorAll('.category').forEach(cat => cat.style.display = 'none');
+      if (step === 'menu' && currentCategory) {
+        document.getElementById(currentCategory).style.display = '';
+      }
+      document.getElementById('checkoutForm').style.display = (step === 'checkout') ? '' : 'none';
+    }
+
+    // Welcome "Start Order" button
+    document.querySelector('#welcome button').onclick = function() {
+      showStep('category');
+    };
+
+    // Category buttons
+    document.querySelectorAll('#categories button').forEach(btn => {
+      btn.onclick = function() {
+        const cat = btn.getAttribute('onclick').match(/#(\w+)/)[1];
+        currentCategory = cat;
+        showStep('menu');
+      };
+    });
+
+    // Sidebar category links
+    document.querySelectorAll('.sidebar nav a[data-category]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentCategory = this.getAttribute('data-category');
+        showStep('menu');
+      });
+    });
+
+    // Add to Cart
+    window.addToCart = function(name, price) {
+      const item = cart.find(i => i.name === name);
+      if (item) {
+        item.qty++;
+      } else {
+        cart.push({ name, price, qty: 1 });
+      }
+      openCart();
+      updateCartDisplay();
+      // Cart bounce animation
+      const cartBtn = document.getElementById('viewCartBtn');
+      cartBtn.classList.remove('bounce');
+      void cartBtn.offsetWidth; // force reflow
+      cartBtn.classList.add('bounce');
+    };
+
+    // Cart Modal
+    window.openCart = function() {
+      document.getElementById('cartModal').style.display = 'flex';
+      updateCartDisplay();
+    };
+    window.closeCart = function() {
+      document.getElementById('cartModal').style.display = 'none';
+    };
+
+    function updateCartDisplay() {
+      const cartItems = document.getElementById('cartItems');
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        total += item.price * item.qty;
+        const li = document.createElement('li');
+        li.textContent = `${item.name} x${item.qty} - ₱${item.price * item.qty}`;
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.style.marginLeft = '1rem';
+        removeBtn.onclick = () => {
+          cart = cart.filter(i => i.name !== item.name);
+          updateCartDisplay();
+        };
+        li.appendChild(removeBtn);
+        cartItems.appendChild(li);
+      });
+      document.getElementById('cartTotal').textContent = 'Total: ₱' + total;
+    }
+
+    // Show checkout form
+    window.showCheckout = function() {
+      document.getElementById('cartModal').style.display = 'none';
+      showStep('checkout');
+    };
+    window.cancelCheckout = function() {
+      showStep('menu');
+    };
+
+    const auth = firebase.auth();
+    let customerEmail = null;
+
+    // Show/hide login modal
+    document.getElementById('customerLoginBtn').onclick = function() {
+      document.getElementById('customerLoginModal').style.display = 'flex';
+    };
+    function closeCustomerLoginModal() {
+      document.getElementById('customerLoginModal').style.display = 'none';
+    }
+
+    // Email link login
+    document.getElementById('customerLoginForm').onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('customerEmail').value.trim();
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+      auth.sendSignInLinkToEmail(email, actionCodeSettings)
+        .then(() => {
+          window.localStorage.setItem('customerEmailForSignIn', email);
+          document.getElementById('customerLoginMsg').textContent = 'A sign-in link has been sent to your email.';
+          showToast('Sign-in link sent to your email!');
+        })
+        .catch(err => {
+          document.getElementById('customerLoginMsg').textContent = err.message;
+          showToast('Login error: ' + err.message, '#e74c3c');
+        });
+    };
+
+    // Handle sign-in with email link
+    if (auth.isSignInWithEmailLink(window.location.href)) {
+      let email = window.localStorage.getItem('customerEmailForSignIn');
+      if (!email) {
+        email = window.prompt('Please provide your email for confirmation');
+      }
+      auth.signInWithEmailLink(email, window.location.href)
+        .then(result => {
+          customerEmail = result.user.email;
+          window.localStorage.removeItem('customerEmailForSignIn');
+          document.getElementById('customerLoginModal').style.display = 'none';
+          showCustomerWelcome();
+        })
+        .catch(err => {
+          alert('Login failed: ' + err.message);
+        });
+    }
+
+    // Show welcome and My Orders button if logged in
+    function showCustomerWelcome() {
+      document.getElementById('customerLoginBtn').textContent = 'My Orders';
+      document.getElementById('customerLoginBtn').onclick = function() {
+        showMyOrders();
+      };
+    }
+
+    // Loyalty settings
+    const LOYALTY_THRESHOLD = 5;
+
+    // Show My Orders modal (with loyalty progress)
+    function showMyOrders() {
+      document.getElementById('myOrdersModal').style.display = 'flex';
+      const listDiv = document.getElementById('myOrdersList');
+      listDiv.textContent = 'Loading...';
+      if (!auth.currentUser) {
+        listDiv.textContent = 'Please log in to view your orders.';
+        return;
+      }
+      db.collection('orders').where('customerEmail', '==', auth.currentUser.email).orderBy('timestamp', 'desc').get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            listDiv.textContent = 'No orders found.';
+            return;
+          }
+          // Loyalty logic
+          let completedCount = 0;
+          let totalCount = 0;
+          let html = '';
+          snapshot.forEach(doc => {
+            const order = doc.data();
+            totalCount++;
+            if (order.status === 'completed') completedCount++;
+          });
+          const progress = Math.min(completedCount % LOYALTY_THRESHOLD, LOYALTY_THRESHOLD);
+          const cycles = Math.floor(completedCount / LOYALTY_THRESHOLD);
+          html += `<div style='margin-bottom:1.2rem;'>
+            <div style='font-weight:600;'>Loyalty Progress: ${progress}/${LOYALTY_THRESHOLD} completed orders</div>
+            <div style='background:#eee; border-radius:8px; height:18px; width:100%; margin:0.5rem 0; overflow:hidden;'>
+              <div style='background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); height:100%; width:${(progress/LOYALTY_THRESHOLD)*100}%; transition:width 0.4s;'></div>
+            </div>
+            ${cycles > 0 ? `<div style='color:#27ae60; font-weight:600; margin-top:0.5rem;'>🎉 You’ve earned ${cycles} reward${cycles>1?'s':''}! Show this to the staff to redeem.</div>` : ''}
+          </div>`;
+          html += '<ul style="text-align:left; padding-left:1.2em;">';
+          snapshot.forEach(doc => {
+            const order = doc.data();
+            html += `<li><b>${order.timestamp ? new Date(order.timestamp.seconds ? order.timestamp.seconds * 1000 : order.timestamp).toLocaleString() : ''}</b> - ₱${order.cart.reduce((sum, i) => sum + i.price * i.qty, 0)}<br>${order.cart.map(i => i.name + ' x' + i.qty).join(', ')}<br>Status: <span style='color:${order.status === 'completed' ? '#27ae60' : '#e67e22'}'>${order.status === 'completed' ? 'Completed' : 'Pending'}</span>${order.notes ? `<br><span style='color:#8B5E3C;'>Note: ${order.notes}</span>` : ''}</li><hr>`;
+          });
+          html += '</ul>';
+          listDiv.innerHTML = html;
+        });
+    }
+    function closeMyOrdersModal() {
+      document.getElementById('myOrdersModal').style.display = 'none';
+    }
+
+    // Submit order
+    window.submitOrder = function(e) {
+      e.preventDefault();
+      const order = {
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        cart: [...cart],
+        timestamp: new Date(),
+        notes: document.getElementById('orderNotes').value.trim(),
+        // Save customer email if logged in
+        customerEmail: auth.currentUser ? auth.currentUser.email : null
+      };
+      db.collection('orders').add(order)
+        .then((docRef) => {
+          cart = [];
+          updateCartDisplay();
+          showStep('welcome');
+          showOrderPlacedModal(docRef.id);
+          showToast('Order placed successfully!');
+        })
+        .catch((error) => {
+          showToast('Error saving order: ' + error.message, '#e74c3c');
+        });
+    };
+
+    // Show order placed modal
+    function showOrderPlacedModal(orderId) {
+      const modal = document.createElement('div');
+      modal.id = 'orderPlacedModal';
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100vw';
+      modal.style.height = '100vh';
+      modal.style.background = 'rgba(0,0,0,0.4)';
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+      modal.style.zIndex = '3000';
+      modal.innerHTML = `
+        <div style="background:white; border-radius:10px; padding:2rem; min-width:300px; max-width:90vw; position:relative; text-align:center;">
+          <h2>Order Placed!</h2>
+          <p>Your order ID is:</p>
+          <div style="font-size:1.2rem; font-weight:bold; margin-bottom:1rem;">${orderId}</div>
+          <a href="track.html?id=${orderId}" style="color:#8B5E3C; text-decoration:underline;">Track your order</a>
+          <br><br>
+          <button onclick="closeOrderPlacedModal()" style="margin-top:1rem; padding:0.6rem 1.2rem; background:#8B5E3C; color:white; border:none; border-radius:6px; cursor:pointer;">Close</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function closeOrderPlacedModal() {
+      const modal = document.getElementById('orderPlacedModal');
+      if (modal) modal.remove();
+    }
+
+    // Show/hide customer chat modal
+    let chatUnsub = null;
+    function openCustomerChatModal() {
+      document.getElementById('customerChatModal').style.display = 'flex';
+      loadCustomerChat();
+    }
+    function closeCustomerChatModal() {
+      document.getElementById('customerChatModal').style.display = 'none';
+      if (chatUnsub) chatUnsub();
+    }
+
+    // Add Chat button for logged-in customers
+    function showCustomerWelcome() {
+      document.getElementById('customerLoginBtn').textContent = 'My Orders';
+      document.getElementById('customerLoginBtn').onclick = function() {
+        showMyOrders();
+      };
+      // Add Chat button if not already present
+      if (!document.getElementById('customerChatBtn')) {
+        const chatBtn = document.createElement('button');
+        chatBtn.id = 'customerChatBtn';
+        chatBtn.textContent = 'Chat';
+        chatBtn.style.cssText = 'position:fixed; bottom:90px; right:2rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:50%; width:60px; height:60px; font-size:1.2rem; font-weight:600; box-shadow:0 2px 8px rgba(139,94,60,0.2); z-index:999; cursor:pointer;';
+        chatBtn.onclick = openCustomerChatModal;
+        document.body.appendChild(chatBtn);
+      }
+    }
+
+    // Customer chat Firestore logic
+    function loadCustomerChat() {
+      const chatHistory = document.getElementById('customerChatHistory');
+      chatHistory.innerHTML = '<div style="color:#aaa;">Loading...</div>';
+      if (!auth.currentUser) {
+        chatHistory.innerHTML = '<div style="color:#e74c3c;">Please log in to use chat.</div>';
+        return;
+      }
+      const chatId = auth.currentUser.email;
+      chatUnsub = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp').onSnapshot(snapshot => {
+        let html = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          html += `<div style='margin-bottom:0.5rem; text-align:${msg.sender==='customer'?'right':'left'};'>
+            <span style='display:inline-block; background:${msg.sender==='customer'?'#8B5E3C':'#c49a6c'}; color:white; border-radius:12px; padding:0.4rem 0.9rem; max-width:70%; word-break:break-word;'>${msg.text}</span>
+            <div style='font-size:0.8em; color:#888; margin-top:0.1rem;'>${msg.timestamp ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString() : ''}</div>
+          </div>`;
+        });
+        chatHistory.innerHTML = html || '<div style="color:#aaa;">No messages yet.</div>';
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      });
+    }
+
+    function showToast(message, color) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = color || '#8B5E3C';
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    document.body.addEventListener('submit', function(e) {
+      if (e.target && e.target.id === 'customerChatForm') {
+        e.preventDefault();
+        const input = document.getElementById('customerChatInput');
+        const text = input.value.trim();
+        if (!text || !auth.currentUser) return;
+        const chatId = auth.currentUser.email;
+        db.collection('chats').doc(chatId).collection('messages').add({
+          text,
+          sender: 'customer',
+          timestamp: new Date()
+        }).then(() => {
+          showToast('Message sent!');
+        }).catch(err => {
+          showToast('Chat error: ' + err.message, '#e74c3c');
+        });
+        input.value = '';
+      }
+    });
+
+    // (No Firestore menu rendering script)
+  </script>
+</body>
+</html>

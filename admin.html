@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insta Cravings Admin</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #fdfaf6; color: #3a2f2f; margin: 0; padding: 2rem; }
+    h1 { color: #8B5E3C; }
+    table { width: 100%; border-collapse: collapse; margin-top: 2rem; background: white; }
+    th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
+    th { background: #8B5E3C; color: white; }
+    tr:nth-child(even) { background: #f9f4ee; }
+    .items-list { font-size: 0.95em; }
+    .timestamp { color: #888; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Insta Cravings Admin Panel</h1>
+  <div id="loginSection" style="max-width:400px; margin:auto; display:none;">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <input type="email" id="adminEmail" placeholder="Email" required style="width:100%;padding:0.5rem;margin-bottom:1rem;" />
+      <input type="password" id="adminPassword" placeholder="Password" required style="width:100%;padding:0.5rem;margin-bottom:1rem;" />
+      <button type="submit" style="padding:0.6rem 1.2rem; background:#8B5E3C; color:white; border:none; border-radius:6px; cursor:pointer;">Login</button>
+    </form>
+    <div id="loginError" style="color:red; margin-top:1rem;"></div>
+  </div>
+  <div id="adminPanel" style="display:none;">
+    <button id="logoutBtn" style="float:right; background:#8B5E3C; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; margin-bottom:1rem; cursor:pointer;">Logout</button>
+    <h2>Orders</h2>
+    <label for="statusFilter">Filter:</label>
+    <select id="statusFilter" style="margin-bottom:1rem;">
+      <option value="all">All</option>
+      <option value="pending">Pending</option>
+      <option value="completed">Completed</option>
+      <option value="today">Today</option>
+    </select>
+    <table id="ordersTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Phone</th>
+          <th>Items</th>
+          <th>Time</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Orders will be inserted here -->
+      </tbody>
+    </table>
+    <h2 style="margin-top:2.5rem;">Customer Chats</h2>
+    <div id="chatList" style="margin-bottom:2rem;"></div>
+    <h2 style="margin-top:2.5rem;">Menu Management</h2>
+    <div id="menuManagement" style="margin-bottom:2rem;"></div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div id="orderModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:10px; padding:2rem; min-width:300px; max-width:90vw; position:relative;">
+      <button onclick="closeOrderModal()" style="position:absolute; top:1rem; right:1rem; background:#ccc; color:#333; border:none; border-radius:50%; width:32px; height:32px; font-size:1.2rem; cursor:pointer;">&times;</button>
+      <div id="orderModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" style="display:none; position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:#8B5E3C; color:white; padding:1rem 2rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); font-size:1.1rem; z-index:3000; min-width:200px; text-align:center;"></div>
+
+  <!-- Admin Chat Panel -->
+  <div id="adminChatPanel" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:4100; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:14px; padding:1.5rem 1.2rem 1.2rem 1.2rem; min-width:320px; max-width:95vw; width:350px; position:relative; display:flex; flex-direction:column; height:70vh;">
+      <button onclick="closeAdminChatPanel()" style="position:absolute; top:1rem; right:1rem; background:#ccc; color:#333; border:none; border-radius:50%; width:32px; height:32px; font-size:1.2rem; cursor:pointer;">&times;</button>
+      <h2 style="margin-bottom:0.5rem;">Customer Chat</h2>
+      <div id="adminChatHistory" style="flex:1; overflow-y:auto; background:#f7e9d7; border-radius:8px; padding:0.7rem; margin-bottom:0.7rem; font-size:0.98rem;"></div>
+      <form id="adminChatForm" style="display:flex; gap:0.5rem;">
+        <input type="text" id="adminChatInput" placeholder="Type your message..." required style="flex:1; padding:0.5rem; border-radius:7px; border:1px solid #c49a6c; font-size:1rem;" />
+        <button type="submit" style="padding:0.5rem 1rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:8px; font-size:1.05rem; font-weight:600; cursor:pointer;">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Menu Item Form -->
+  <div id="addMenuItemForm" style="margin-bottom:1.5rem;">
+    <h3>Add Menu Item</h3>
+    <form id="menuItemForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+      <input type="text" id="menuItemName" placeholder="Name" required style="padding:0.4rem; border-radius:6px; border:1px solid #c49a6c; font-size:1rem;" />
+      <input type="number" id="menuItemPrice" placeholder="Price" required style="padding:0.4rem; border-radius:6px; border:1px solid #c49a6c; font-size:1rem; width:90px;" />
+      <input type="text" id="menuItemImage" placeholder="Image path (e.g. images/buldak.webp)" required style="padding:0.4rem; border-radius:6px; border:1px solid #c49a6c; font-size:1rem; width:220px;" />
+      <label style="font-size:0.98rem;">
+        <input type="checkbox" id="menuItemAvailable" checked /> Available
+      </label>
+      <button type="submit" style="padding:0.5rem 1.2rem; background:linear-gradient(90deg,#c49a6c 0%,#8B5E3C 100%); color:white; border:none; border-radius:8px; font-size:1.05rem; font-weight:600; cursor:pointer;">Add Item</button>
+    </form>
+  </div>
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-F1tlZBbjLWxEEOo-t_iTAoAujRt4bgs",
+      authDomain: "instacravings.firebaseapp.com",
+      projectId: "instacravings",
+      storageBucket: "instacravings.appspot.com",
+      messagingSenderId: "848484389296",
+      appId: "1:848484389296:web:650ee8d462e4b32b29c675",
+      measurementId: "G-LFB39XSBQ1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Auth state observer
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('adminPanel').style.display = '';
+        loadOrders();
+        loadCustomerChats(); // Load chats when admin logs in
+        loadMenuManagement(); // Load menu management when admin logs in
+      } else {
+        document.getElementById('loginSection').style.display = '';
+        document.getElementById('adminPanel').style.display = 'none';
+      }
+    });
+
+    // Login form
+    document.getElementById('loginForm').onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value;
+      const password = document.getElementById('adminPassword').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(err => {
+          document.getElementById('loginError').textContent = err.message;
+        });
+    };
+
+    // Logout
+    document.getElementById('logoutBtn').onclick = function() {
+      auth.signOut();
+    };
+
+    // Orders logic
+    let unsubscribe = null;
+    let allOrders = [];
+    // New order notification
+    let lastOrderIds = new Set();
+    function notifyNewOrders(orders) {
+      const currentIds = new Set(orders.map(o => o.id));
+      let newOrderDetected = false;
+      if (lastOrderIds.size > 0) {
+        orders.forEach(order => {
+          if (!lastOrderIds.has(order.id)) {
+            newOrderDetected = true;
+            highlightNewOrderRow(order.id);
+          }
+        });
+      }
+      if (newOrderDetected) showToast('New order received!');
+      lastOrderIds = currentIds;
+    }
+    function highlightNewOrderRow(orderId) {
+      setTimeout(() => {
+        const row = document.getElementById('order-row-' + orderId);
+        if (row) {
+          row.classList.add('new-order-highlight');
+          setTimeout(() => row.classList.remove('new-order-highlight'), 3000);
+        }
+      }, 100);
+    }
+    // Add highlight style
+    const style = document.createElement('style');
+    style.innerHTML = `.new-order-highlight { background: #ffe6b3 !important; transition: background 0.5s; }`;
+    document.head.appendChild(style);
+    function loadOrders() {
+      if (unsubscribe) unsubscribe();
+      unsubscribe = db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        const orders = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          data.id = doc.id;
+          if (!data.status) data.status = 'pending';
+          orders.push(data);
+        });
+        allOrders = orders;
+        renderOrders();
+        notifyNewOrders(orders);
+      });
+    }
+
+    document.getElementById('statusFilter').onchange = renderOrders;
+
+    function renderOrders() {
+      const filter = document.getElementById('statusFilter').value;
+      const tbody = document.querySelector('#ordersTable tbody');
+      tbody.innerHTML = '';
+      let filtered = allOrders;
+      if (filter === 'pending' || filter === 'completed') {
+        filtered = allOrders.filter(order => order.status === filter);
+      } else if (filter === 'today') {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        filtered = allOrders.filter(order => {
+          if (!order.timestamp) return false;
+          const ts = order.timestamp.seconds ? new Date(order.timestamp.seconds * 1000) : new Date(order.timestamp);
+          ts.setHours(0,0,0,0);
+          return ts.getTime() === today.getTime();
+        });
+      }
+      filtered.forEach(order => {
+        const tr = document.createElement('tr');
+        tr.id = `order-row-${order.id}`; // Add ID for highlighting
+        tr.innerHTML = `
+          <td>${order.name}</td>
+          <td>${order.address}</td>
+          <td>${order.phone}</td>
+          <td class="items-list">${order.cart.map(item => `${item.name} x${item.qty} (₱${item.price * item.qty})`).join('<br>')}</td>
+          <td class="timestamp">${order.timestamp ? new Date(order.timestamp.seconds ? order.timestamp.seconds * 1000 : order.timestamp).toLocaleString() : ''}</td>
+          <td>${order.notes ? order.notes : ''}</td>
+          <td>${order.status === 'completed' ? '✅ Completed' : '⏳ Pending'}</td>
+          <td>
+            ${order.status === 'pending' ? `<button onclick="markCompleted('${order.id}');event.stopPropagation();">Mark as Completed</button>` : ''}
+            <button onclick="deleteOrder('${order.id}');event.stopPropagation();" style="background:#e74c3c;color:white;border:none;border-radius:4px;padding:0.3rem 0.7rem;margin-left:0.5rem;">Delete</button>
+          </td>
+        `;
+        tr.style.cursor = 'pointer';
+        tr.onclick = function(e) {
+          // Prevent modal if clicking a button
+          if (e.target.tagName === 'BUTTON') return;
+          showOrderModal(order);
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.markCompleted = function(orderId) {
+      db.collection('orders').doc(orderId).update({ status: 'completed' });
+    };
+
+    window.deleteOrder = function(orderId) {
+      if (confirm('Are you sure you want to delete this order?')) {
+        db.collection('orders').doc(orderId).delete();
+      }
+    };
+
+    window.showOrderModal = function(order) {
+      const modal = document.getElementById('orderModal');
+      const content = document.getElementById('orderModalContent');
+      content.innerHTML = `
+        <h2>Order Details</h2>
+        <p><strong>Name:</strong> ${order.name}</p>
+        <p><strong>Address:</strong> ${order.address}</p>
+        <p><strong>Phone:</strong> ${order.phone}</p>
+        <p><strong>Status:</strong> ${order.status === 'completed' ? '✅ Completed' : '⏳ Pending'}</p>
+        <p><strong>Time:</strong> ${order.timestamp ? new Date(order.timestamp.seconds ? order.timestamp.seconds * 1000 : order.timestamp).toLocaleString() : ''}</p>
+        ${order.notes ? `<p><strong>Special Instructions:</strong> <span style='color:#8B5E3C;'>${order.notes}</span></p>` : ''}
+        <h3>Items</h3>
+        <ul style='padding-left:1.2em;'>
+          ${order.cart.map(item => `<li>${item.name} x${item.qty} (₱${item.price * item.qty})</li>`).join('')}
+        </ul>
+      `;
+      modal.style.display = 'flex';
+    };
+    window.closeOrderModal = function() {
+      document.getElementById('orderModal').style.display = 'none';
+    };
+
+    // Toast notification
+    function showToast(message, color) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = color || '#8B5E3C';
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    // Admin Chat Panel
+    let adminChatUnsub = null;
+    let currentChatId = null;
+    function loadCustomerChats() {
+      const chatListDiv = document.getElementById('chatList');
+      chatListDiv.innerHTML = 'Loading...';
+      db.collection('chats').get().then(snapshot => {
+        if (snapshot.empty) {
+          chatListDiv.innerHTML = 'No customer chats.';
+          return;
+        }
+        let html = '<ul style="text-align:left; padding-left:1.2em;">';
+        snapshot.forEach(doc => {
+          html += `<li><button onclick="openAdminChatPanel('${doc.id}')" style='background:#8B5E3C; color:white; border:none; border-radius:6px; padding:0.4rem 1rem; margin-bottom:0.5rem; cursor:pointer;'>Chat with ${doc.id}</button></li>`;
+        });
+        html += '</ul>';
+        chatListDiv.innerHTML = html;
+      });
+    }
+    loadCustomerChats();
+
+    function openAdminChatPanel(chatId) {
+      currentChatId = chatId;
+      document.getElementById('adminChatPanel').style.display = 'flex';
+      loadAdminChat(chatId);
+    }
+    function closeAdminChatPanel() {
+      document.getElementById('adminChatPanel').style.display = 'none';
+      if (adminChatUnsub) adminChatUnsub();
+    }
+    function loadAdminChat(chatId) {
+      const chatHistory = document.getElementById('adminChatHistory');
+      chatHistory.innerHTML = '<div style="color:#aaa;">Loading...</div>';
+      adminChatUnsub = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp').onSnapshot(snapshot => {
+        let html = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          html += `<div style='margin-bottom:0.5rem; text-align:${msg.sender==='customer'?'right':'left'};'>
+            <span style='display:inline-block; background:${msg.sender==='customer'?'#8B5E3C':'#c49a6c'}; color:white; border-radius:12px; padding:0.4rem 0.9rem; max-width:70%; word-break:break-word;'>${msg.text}</span>
+            <div style='font-size:0.8em; color:#888; margin-top:0.1rem;'>${msg.timestamp ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString() : ''}</div>
+          </div>`;
+        });
+        chatHistory.innerHTML = html || '<div style="color:#aaa;">No messages yet.</div>';
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      });
+    }
+    document.body.addEventListener('submit', function(e) {
+      if (e.target && e.target.id === 'adminChatForm') {
+        e.preventDefault();
+        const input = document.getElementById('adminChatInput');
+        const text = input.value.trim();
+        if (!text || !currentChatId) return;
+        db.collection('chats').doc(currentChatId).collection('messages').add({
+          text,
+          sender: 'admin',
+          timestamp: new Date()
+        }).then(() => {
+          showToast('Message sent!');
+        }).catch(err => {
+          showToast('Chat error: ' + err.message, '#e74c3c');
+        });
+        input.value = '';
+      }
+    });
+
+    // Menu Management
+    function loadMenuManagement() {
+      const menuDiv = document.getElementById('menuManagement');
+      menuDiv.innerHTML = 'Loading...';
+      db.collection('menu').get().then(snapshot => {
+        if (snapshot.empty) {
+          menuDiv.innerHTML = 'No menu items.';
+          return;
+        }
+        let html = '<table style="width:100%; border-collapse:collapse;">';
+        html += '<tr><th>Name</th><th>Price</th><th>Available</th><th>Action</th></tr>';
+        snapshot.forEach(doc => {
+          const item = doc.data();
+          html += `<tr>
+            <td>${item.name}</td>
+            <td>₱${item.price}</td>
+            <td><input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleMenuAvailability('${doc.id}', this.checked)"></td>
+            <td><button onclick="deleteMenuItem('${doc.id}')" style='background:#e74c3c; color:white; border:none; border-radius:6px; padding:0.3rem 0.9rem; cursor:pointer;'>Delete</button></td>
+          </tr>`;
+        });
+        html += '</table>';
+        menuDiv.innerHTML = html;
+      });
+    }
+    window.toggleMenuAvailability = function(id, available) {
+      db.collection('menu').doc(id).update({ available }).then(() => {
+        showToast('Menu item updated!');
+      }).catch(err => {
+        showToast('Error updating menu: ' + err.message, '#e74c3c');
+      });
+    };
+    window.deleteMenuItem = function(id) {
+      if (!confirm('Delete this menu item?')) return;
+      db.collection('menu').doc(id).delete().then(() => {
+        showToast('Menu item deleted!');
+        loadMenuManagement();
+      }).catch(err => {
+        showToast('Error deleting menu item: ' + err.message, '#e74c3c');
+      });
+    };
+    // Add Menu Item logic
+    document.getElementById('menuItemForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('menuItemName').value.trim();
+      const price = parseFloat(document.getElementById('menuItemPrice').value);
+      const image = document.getElementById('menuItemImage').value.trim();
+      const available = document.getElementById('menuItemAvailable').checked;
+      if (!name || isNaN(price) || !image) {
+        showToast('Please fill out all fields.', '#e74c3c');
+        return;
+      }
+      db.collection('menu').add({ name, price, image, available }).then(() => {
+        showToast('Menu item added!');
+        document.getElementById('menuItemForm').reset();
+        document.getElementById('menuItemAvailable').checked = true;
+        loadMenuManagement();
+      }).catch(err => {
+        showToast('Error adding menu item: ' + err.message, '#e74c3c');
+      });
+    };
+    // Load menu management after login
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loadMenuManagement();
+      }
+    });
+  </script>
+</body>
+</html> 

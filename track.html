@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Your Order - Insta Cravings</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #fdfaf6; color: #3a2f2f; margin: 0; padding: 2rem; }
+    h1 { color: #8B5E3C; }
+    #trackForm { margin-bottom: 2rem; }
+    input[type=text] { padding: 0.5rem; width: 250px; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 0.6rem 1.2rem; background: #8B5E3C; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .order-details { background: white; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); padding: 2rem; max-width: 500px; margin: 2rem auto; }
+    .status { font-weight: bold; }
+    .status.pending { color: #e67e22; }
+    .status.completed { color: #27ae60; }
+    .error { color: #e74c3c; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Track Your Order</h1>
+  <form id="trackForm">
+    <label for="orderId">Enter your Order ID:</label>
+    <input type="text" id="orderId" required />
+    <button type="submit">Track</button>
+  </form>
+  <div id="orderResult"></div>
+
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-F1tlZBbjLWxEEOo-t_iTAoAujRt4bgs",
+      authDomain: "instacravings.firebaseapp.com",
+      projectId: "instacravings",
+      storageBucket: "instacravings.appspot.com",
+      messagingSenderId: "848484389296",
+      appId: "1:848484389296:web:650ee8d462e4b32b29c675",
+      measurementId: "G-LFB39XSBQ1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Helper to get query param
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    // Track form
+    document.getElementById('trackForm').onsubmit = function(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('orderId').value.trim();
+      trackOrder(orderId);
+    };
+
+    // If ?id= is present, auto-track
+    const autoId = getQueryParam('id');
+    if (autoId) {
+      document.getElementById('orderId').value = autoId;
+      trackOrder(autoId);
+    }
+
+    function trackOrder(orderId) {
+      const resultDiv = document.getElementById('orderResult');
+      resultDiv.innerHTML = '';
+      db.collection('orders').doc(orderId).get().then(doc => {
+        if (!doc.exists) {
+          resultDiv.innerHTML = '<div class="error">Order not found. Please check your Order ID.</div>';
+          return;
+        }
+        const order = doc.data();
+        const status = order.status === 'completed' ? 'Completed' : 'Pending';
+        resultDiv.innerHTML = `
+          <div class="order-details">
+            <h2>Status: <span class="status ${order.status === 'completed' ? 'completed' : 'pending'}">${status}</span></h2>
+            <p><strong>Name:</strong> ${order.name}</p>
+            <p><strong>Address:</strong> ${order.address}</p>
+            <p><strong>Phone:</strong> ${order.phone}</p>
+            <p><strong>Time:</strong> ${order.timestamp ? new Date(order.timestamp.seconds ? order.timestamp.seconds * 1000 : order.timestamp).toLocaleString() : ''}</p>
+            <h3>Items</h3>
+            <ul>
+              ${order.cart.map(item => `<li>${item.name} x${item.qty} (₱${item.price * item.qty})</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }).catch(() => {
+        resultDiv.innerHTML = '<div class="error">Error retrieving order. Please try again later.</div>';
+      });
+    }
+  </script>
+</body>
+</html> 
